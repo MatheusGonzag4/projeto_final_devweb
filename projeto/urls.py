@@ -21,4 +21,9 @@ urlpatterns += [
         serve,
         {"document_root": settings.BASE_DIR / "app" / "static"},
     ),
+    path(
+        "assets/<path:path>",
+        serve,
+        {"document_root": settings.BASE_DIR / "app" / "static"},
+    ),
 ]
