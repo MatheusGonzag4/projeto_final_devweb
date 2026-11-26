@@ -1,0 +1,51 @@
+{% extends 'template.html' %}
+
+{% block titulo %}Equipe | CompraAi{% endblock %}
+
+{% block conteudo %}
+<div class="pagina">
+    {% url 'dashboard' as dash %}{% include 'voltar.html' with destino=dash texto='Voltar ao dashboard' %}
+    <div class="cartao cartao-tabela">
+        <div class="cabecalho-pagina">
+            <div>
+                <h1>Gerenciar Integrantes</h1>
+                <p class="sub">Cadastre, consulte, edite e exclua os integrantes.</p>
+            </div>
+            <a class="btn btn-laranja" href="{% url 'addIntegrante' %}">+ Novo Integrante</a>
+        </div>
+
+        <div class="tabela-rolagem">
+            <table class="tabela">
+                <thead>
+                    <tr><th>ID</th><th>Foto</th><th>Nome</th><th>Cargo</th><th>Biografia</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for integrante in integrantes %}
+                        <tr>
+                            <td>{{ integrante.id }}</td>
+                            <td>
+                                {% if integrante.foto_url %}<img class="avatar" src="{{ integrante.foto_url }}" alt="Foto de {{ integrante.nome }}" loading="lazy">{% else %}<span class="avatar vazio-img"></span>{% endif %}
+                            </td>
+                            <td><strong>{{ integrante.nome }}</strong></td>
+                            <td>{{ integrante.cargo }}</td>
+                            <td>{{ integrante.biografia }}</td>
+                            <td>
+                                <div class="acoes-linha">
+                                    <a class="btn-pequeno claro" href="{% url 'editIntegrante' integrante.id %}">Editar</a>
+                                    <form method="post" action="{% url 'delIntegrante' integrante.id %}" onsubmit="return confirm('Excluir {{ integrante.nome|escapejs }} da equipe?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-pequeno perigo">Excluir</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="vazio">Nenhum integrante cadastrado.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="rodape-tabela">Total de integrantes cadastrados: <strong>{{ integrantes|length }}</strong></p>
+    </div>
+</div>
+{% endblock %}
