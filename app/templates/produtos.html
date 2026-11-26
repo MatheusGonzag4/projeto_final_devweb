@@ -1,0 +1,94 @@
+{% extends 'template.html' %}
+
+{% block titulo %}Produtos | CompraAi{% endblock %}
+
+{% block conteudo %}
+<div class="pagina">
+    <div class="secao-titulo" style="margin-top:0">
+        <div>
+            <h1>Produtos e Serviços</h1>
+            <p class="sub">Confira nossos produtos e descubra opções disponíveis para você.
+                {% if not user.is_authenticated %}Para comprar, <a href="{% url 'login' %}?next={% url 'produtos' %}">entre na sua conta</a>.{% endif %}</p>
+        </div>
+    </div>
+
+    <form method="get" class="filtros-barra" id="filtros">
+        <div class="busca">
+            <input type="search" name="busca" placeholder="Buscar produto pelo nome..." value="{{ busca }}">
+            <button type="submit" class="btn">Buscar</button>
+        </div>
+        <label class="ordem">Ordenar por
+            <select name="ordem">
+                <option value="">Nome</option>
+                <option value="menor" {% if ordem == 'menor' %}selected{% endif %}>Menor preço</option>
+                <option value="maior" {% if ordem == 'maior' %}selected{% endif %}>Maior preço</option>
+            </select>
+        </label>
+        {% if categorias %}
+            <div class="chips">
+                <label class="chip"><input type="radio" name="categoria" value="" {% if not categoria %}checked{% endif %}><span>Todas</span></label>
+                {% for item in categorias %}
+                    <label class="chip"><input type="radio" name="categoria" value="{{ item.id }}" {% if categoria == item.id|stringformat:"s" %}checked{% endif %}><span>{{ item.nome }}</span></label>
+                {% endfor %}
+                {% if filtrando %}<a class="limpar" href="{% url 'produtos' %}">Limpar filtros</a>{% endif %}
+            </div>
+        {% endif %}
+    </form>
+
+    <section class="secao" style="margin-top:32px">
+        <div class="secao-titulo">
+            <div>
+                <h2>Serviços da Nossa Loja</h2>
+                <p class="sub">Produtos cadastrados diretamente em nosso site.</p>
+            </div>
+        </div>
+        <div class="vitrine">
+            {% for produto in produtos %}
+                {% include 'item_produto.html' %}
+            {% empty %}
+                <p class="vazio">Nenhum produto encontrado.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if not categoria %}
+        <section class="secao">
+            <div class="secao-titulo">
+                <div>
+                    <h2>Produtos das Lojas Parceiras</h2>
+                    <p class="sub">Confira também produtos disponíveis em nossos parceiros.</p>
+                </div>
+            </div>
+            <div class="vitrine">
+                {% for produto in produtos_api %}
+                    <article class="item">
+                        <div class="item-img">
+                            <span class="etiqueta parceiro">Parceiro</span>
+                            <img class="contido" src="{{ produto.image }}" alt="{{ produto.title }}" loading="lazy">
+                        </div>
+                        <div class="item-corpo">
+                            <h3>{{ produto.title }}</h3>
+                            <p>{{ produto.description }}</p>
+                        </div>
+                        <div class="item-rodape">
+                            <span class="preco"><small>R$</small> {{ produto.price|floatformat:"2g" }}</span>
+                            <span class="parceiro-aviso">Vendido por loja parceira</span>
+                        </div>
+                    </article>
+                {% empty %}
+                    <p class="vazio">
+                        {% if api_fora %}Não foi possível carregar os produtos dos parceiros agora.{% else %}Nenhum produto de parceiros encontrado.{% endif %}
+                    </p>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+
+<script>
+    // trocar categoria ou ordem já aplica o filtro
+    document.querySelectorAll('#filtros input[type=radio], #filtros select').forEach(function (campo) {
+        campo.addEventListener('change', function () { campo.form.submit(); });
+    });
+</script>
+{% endblock %}

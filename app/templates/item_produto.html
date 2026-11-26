@@ -1,0 +1,25 @@
+<article class="item">
+    <div class="item-img">
+        {% if produto.imagem %}
+            <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" loading="lazy">
+        {% else %}
+            <div class="sem-foto">Sem imagem</div>
+        {% endif %}
+    </div>
+    <div class="item-corpo">
+        {% if produto.categoria %}<div class="item-cat">{{ produto.categoria }}</div>{% endif %}
+        <h3>{{ produto.nome }}</h3>
+        <p>{{ produto.descricao }}</p>
+    </div>
+    <div class="item-rodape">
+        <span class="preco"><small>R$</small> {{ produto.preco|floatformat:"2g" }}</span>
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'comprar' produto.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-laranja"><svg class="ic"><use href="#i-sacola"/></svg>Comprar</button>
+            </form>
+        {% else %}
+            <a class="btn btn-laranja" href="{% url 'login' %}?next={% url 'produtos' %}"><svg class="ic"><use href="#i-sacola"/></svg>Comprar</a>
+        {% endif %}
+    </div>
+</article>
