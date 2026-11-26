@@ -79,15 +79,20 @@ def index(request):
 
 def quemSomos(request):
     integrantes = []
+    supabase_ok = False
 
     try:
         resposta = get_supabase().table("integrantes").select("*").order("id").execute()
         integrantes = resposta.data
+        supabase_ok = True
     except Exception:
         logger.exception("Falha ao consultar integrantes no Supabase")
         messages.error(request, AVISO_SUPABASE)
 
-    return render(request, "quem-somos.html", {"integrantes": integrantes})
+    return render(request, "quem-somos.html", {
+        "integrantes": integrantes,
+        "supabase_ok": supabase_ok,
+    })
 
 
 def produtos(request):

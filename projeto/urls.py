@@ -12,3 +12,10 @@ urlpatterns = [
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Fallback para o caso de o comando de build do Render não executar collectstatic.
+urlpatterns += static(
+    settings.STATIC_URL,
+    document_root=settings.BASE_DIR / "app" / "static",
+    insecure=True,
+)

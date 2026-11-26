@@ -55,7 +55,11 @@
                     </div>
                 </article>
             {% empty %}
-                <p class="vazio">Nenhum integrante cadastrado.</p>
+                {% if supabase_ok %}
+                    <p class="vazio">Supabase conectado. Nenhum integrante cadastrado.</p>
+                {% else %}
+                    <p class="vazio">Não foi possível consultar os integrantes no Supabase.</p>
+                {% endif %}
             {% endfor %}
         </div>
     </section>
