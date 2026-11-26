@@ -1,0 +1,64 @@
+{% extends 'template.html' %}
+{% load static %}
+
+{% block titulo %}Dashboard | CompraAi{% endblock %}
+
+{% block conteudo %}
+<div class="pagina">
+    <section class="painel-topo">
+        <div>
+            <span class="pequeno">Painel do usuário</span>
+            <h1>Olá, {{ user.first_name|default:user.username }}!</h1>
+            <p>Bem-vindo ao seu painel de controle. Escolha uma das opções abaixo para continuar.</p>
+        </div>
+        <div class="tile"><img src="{% static 'img/icone.png' %}" alt=""></div>
+    </section>
+
+    <section class="secao" style="margin-top:36px">
+        <div class="secao-titulo">
+            <div>
+                <h2>Meu espaço</h2>
+                <p class="sub">Gerencie suas informações, acompanhe seus pedidos e acesse as funcionalidades disponíveis na plataforma.</p>
+            </div>
+        </div>
+        <div class="atalhos">
+            <a class="atalho" href="{% url 'perfil' %}">
+                <div class="icone"><svg class="ic"><use href="#i-usuario"/></svg></div>
+                <h3>Editar Perfil</h3>
+                <p>Consulte e atualize seus dados cadastrais, informações e preferências.</p>
+                <span>Acessar perfil <svg class="ic"><use href="#i-seta"/></svg></span>
+            </a>
+            <a class="atalho" href="{% url 'contatos' %}">
+                <div class="icone"><svg class="ic"><use href="#i-mensagem"/></svg></div>
+                <h3>Contatos</h3>
+                <p>Consulte e gerencie os contatos cadastrados na plataforma.</p>
+                <span>Gerenciar contatos <svg class="ic"><use href="#i-seta"/></svg></span>
+            </a>
+            <a class="atalho" href="{% url 'servicos' %}">
+                <div class="icone"><svg class="ic"><use href="#i-servico"/></svg></div>
+                <h3>Serviços</h3>
+                <p>Cadastre, consulte e gerencie os serviços disponíveis no sistema.</p>
+                <span>Gerenciar serviços <svg class="ic"><use href="#i-seta"/></svg></span>
+            </a>
+            <a class="atalho" href="{% url 'integrantes' %}">
+                <div class="icone"><svg class="ic"><use href="#i-equipe"/></svg></div>
+                <h3>Equipe</h3>
+                <p>Gerencie os integrantes, cargos, biografias e informações da equipe.</p>
+                <span>Gerenciar equipe <svg class="ic"><use href="#i-seta"/></svg></span>
+            </a>
+            <a class="atalho" href="{% url 'pedidos' %}">
+                <div class="icone"><svg class="ic"><use href="#i-sacola"/></svg></div>
+                <h3>Meus Pedidos</h3>
+                <p>Consulte seus serviços adquiridos, acompanhe suas compras e visualize os valores.</p>
+                <span>Visualizar pedidos <svg class="ic"><use href="#i-seta"/></svg></span>
+            </a>
+            <a class="atalho" href="{% url 'relatorios' %}">
+                <div class="icone"><svg class="ic"><use href="#i-grafico"/></svg></div>
+                <h3>Relatórios</h3>
+                <p>Consulte informações, dados e estatísticas sobre os serviços e pedidos da plataforma.</p>
+                <span>Acessar relatórios <svg class="ic"><use href="#i-seta"/></svg></span>
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}

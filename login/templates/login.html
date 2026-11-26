@@ -1,0 +1,57 @@
+{% extends 'template.html' %}
+{% load static %}
+
+{% block titulo %}Entrar | CompraAi{% endblock %}
+
+{% block conteudo %}
+<div class="pagina">
+    <div class="auth">
+        <aside class="auth-lado">
+            <div class="auth-logo"><img src="{% static 'img/icone.png' %}" alt=""></div>
+            <h2>Bem-vindo de volta!</h2>
+            <p>Acesse sua conta para continuar utilizando nossa plataforma.</p>
+            <ul>
+                <li><svg class="ic"><use href="#i-check"/></svg>Compre com um clique</li>
+                <li><svg class="ic"><use href="#i-check"/></svg>Acompanhe seus pedidos</li>
+                <li><svg class="ic"><use href="#i-check"/></svg>Mantenha seus dados atualizados</li>
+            </ul>
+        </aside>
+
+        <form method="post" class="auth-form">
+            <h1>Entrar na sua conta</h1>
+            <p class="sub">Informe seus dados de acesso abaixo.</p>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {{ form.non_field_errors }}
+
+            <div class="campo">
+                <label for="{{ form.username.id_for_label }}">Usuário</label>
+                {{ form.username }}
+            </div>
+
+            <div class="campo">
+                <label for="{{ form.password.id_for_label }}">Senha</label>
+                <div class="senha">
+                    {{ form.password }}
+                    <button type="button" class="ver-senha" id="verSenha">Mostrar</button>
+                </div>
+                <p class="direita"><a href="{% url 'password_reset' %}">Esqueceu sua senha?</a></p>
+            </div>
+
+            <button type="submit" class="btn btn-laranja btn-cheio">Entrar</button>
+
+            <p class="troca">Não tem uma conta? <a href="{% url 'cadastro' %}"><b>Cadastre-se</b></a></p>
+        </form>
+    </div>
+</div>
+
+<script>
+    var botao = document.getElementById('verSenha');
+    var campo = document.getElementById('{{ form.password.id_for_label }}');
+    botao.addEventListener('click', function () {
+        var escondida = campo.type === 'password';
+        campo.type = escondida ? 'text' : 'password';
+        botao.textContent = escondida ? 'Ocultar' : 'Mostrar';
+    });
+</script>
+{% endblock %}

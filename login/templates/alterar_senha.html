@@ -1,0 +1,29 @@
+{% extends 'template.html' %}
+
+{% block titulo %}Alterar Senha | CompraAi{% endblock %}
+
+{% block conteudo %}
+<div class="pagina pagina-estreita">
+    {% url 'perfil' as perfil_url %}{% include 'voltar.html' with destino=perfil_url texto='Voltar ao meu perfil' %}
+    <h1>Alterar Senha</h1>
+    <p class="sub" style="margin-bottom:20px">Atualize sua senha para manter sua conta protegida e segura.</p>
+
+    <form method="post" class="cartao">
+        <h2>Nova senha</h2>
+        <p class="sub">Preencha os campos abaixo para alterar sua senha.</p>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for campo in form %}
+            {% include 'campo.html' %}
+        {% endfor %}
+        <button type="submit" class="btn btn-cheio">Alterar minha senha</button>
+
+        <div class="faixa-seguranca">
+            <div>
+                <strong>Recomendação de segurança</strong>
+                <p>Utilize uma senha forte, com letras, números e caracteres especiais.</p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
