@@ -10,7 +10,14 @@
 
 Abra http://127.0.0.1:8000/
 
-O arquivo `.env` precisa ter `SUPABASE_URL` e `SUPABASE_KEY`.
+Para desenvolvimento, copie `.env.example` para `.env` e preencha `SUPABASE_URL` e
+`SUPABASE_ANON_KEY` com os valores do projeto Supabase. `SUPABASE_KEY` continua aceito
+para compatibilidade com o deploy antigo.
+
+No Render, cadastre essas variáveis em **Environment**. Também configure
+`DJANGO_SECRET_KEY` com uma chave nova e `DJANGO_DEBUG=False`. O build deve executar
+`./build.sh` e o start pode usar o `Procfile` ou
+`gunicorn projeto.wsgi:application --bind 0.0.0.0:$PORT`.
 
 ## Rotas principais
 

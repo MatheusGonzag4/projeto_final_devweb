@@ -4,6 +4,8 @@ from django.db.models import Count, Max, Min, ProtectedError, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+import logging
+import os
 import requests
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -14,7 +16,31 @@ from .models import Categoria, Pedido, Servico
 from .serializers import CategoriaSerializer
 from .supabase_client import get_supabase
 
+logger = logging.getLogger(__name__)
 AVISO_SUPABASE = "Não foi possível acessar o banco de dados remoto (Supabase). Tente novamente em instantes."
+
+
+def carregar_produtos_parceiros(busca=""):
+    """Busca produtos da API parceira sem derrubar a página quando ela falhar."""
+    url = os.getenv("PARTNER_API_URL", "https://fakestoreapi.com/products").strip()
+    try:
+        timeout = max(5, int(os.getenv("PARTNER_API_TIMEOUT", "15")))
+    except ValueError:
+        timeout = 15
+
+    try:
+        resposta = requests.get(url, timeout=timeout)
+        resposta.raise_for_status()
+        produtos = resposta.json()
+        if not isinstance(produtos, list):
+            raise ValueError("A API parceira não retornou uma lista de produtos.")
+        if busca:
+            termo = busca.lower()
+            produtos = [p for p in produtos if termo in p.get("title", "").lower()]
+        return produtos, False
+    except (requests.RequestException, ValueError, TypeError) as exc:
+        logger.warning("Falha ao consumir API parceira %s: %s", url, exc)
+        return [], True
 
 
 # ---------- páginas públicas ----------
@@ -33,6 +59,7 @@ def quemSomos(request):
         resposta = get_supabase().table("integrantes").select("*").order("id").execute()
         integrantes = resposta.data
     except Exception:
+        logger.exception("Falha ao consultar integrantes no Supabase")
         messages.error(request, AVISO_SUPABASE)
 
     return render(request, "quem-somos.html", {"integrantes": integrantes})
@@ -63,15 +90,7 @@ def produtos(request):
 
     # os produtos dos parceiros não têm categoria, então somem quando uma categoria é escolhida
     if not categoria:
-        try:
-            resposta = requests.get("https://fakestoreapi.com/products", timeout=5)
-            resposta.raise_for_status()
-            produtos_api = resposta.json()
-        except (requests.RequestException, ValueError):
-            api_fora = True
-
-        if busca:
-            produtos_api = [p for p in produtos_api if busca.lower() in p.get("title", "").lower()]
+        produtos_api, api_fora = carregar_produtos_parceiros(busca)
 
     return render(request, "produtos.html", {
         "produtos": produtos,
@@ -220,6 +239,7 @@ def integrantes(request):
         resposta = get_supabase().table("integrantes").select("*").order("id").execute()
         lista = resposta.data
     except Exception:
+        logger.exception("Falha ao consultar integrantes no Supabase")
         messages.error(request, AVISO_SUPABASE)
 
     return render(request, "integrantes.html", {"integrantes": lista})
@@ -240,6 +260,7 @@ def addIntegrante(request):
             messages.success(request, "Integrante cadastrado.")
             return redirect("integrantes")
         except Exception:
+            logger.exception("Falha ao inserir integrante no Supabase")
             messages.error(request, AVISO_SUPABASE)
             return render(request, "add-integrante.html", {"dados": dados})
 
@@ -261,6 +282,7 @@ def editIntegrante(request, id_integrante):
             messages.success(request, "Integrante atualizado.")
             return redirect("integrantes")
         except Exception:
+            logger.exception("Falha ao atualizar integrante no Supabase")
             messages.error(request, AVISO_SUPABASE)
             dados["id"] = id_integrante
             return render(request, "edit-integrante.html", {"integrante": dados})
@@ -268,6 +290,7 @@ def editIntegrante(request, id_integrante):
     try:
         resposta = get_supabase().table("integrantes").select("*").eq("id", id_integrante).execute()
     except Exception:
+        logger.exception("Falha ao consultar integrante no Supabase")
         messages.error(request, AVISO_SUPABASE)
         return redirect("integrantes")
 
@@ -285,6 +308,7 @@ def delIntegrante(request, id_integrante):
         get_supabase().table("integrantes").delete().eq("id", id_integrante).execute()
         messages.success(request, "Integrante excluído.")
     except Exception:
+        logger.exception("Falha ao excluir integrante no Supabase")
         messages.error(request, AVISO_SUPABASE)
 
     return redirect("integrantes")
