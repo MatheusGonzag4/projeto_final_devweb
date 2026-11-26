@@ -5,3 +5,5 @@ python-dotenv
 requests
 Pillow
 unicorn
+gunicorn
+uvicorn
