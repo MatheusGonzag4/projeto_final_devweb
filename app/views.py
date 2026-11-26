@@ -22,25 +22,50 @@ AVISO_SUPABASE = "Não foi possível acessar o banco de dados remoto (Supabase).
 
 def carregar_produtos_parceiros(busca=""):
     """Busca produtos da API parceira sem derrubar a página quando ela falhar."""
-    url = os.getenv("PARTNER_API_URL", "https://fakestoreapi.com/products").strip()
+    urls = [
+        url.strip()
+        for url in os.getenv(
+            "PARTNER_API_URLS",
+            os.getenv("PARTNER_API_URL", "https://fakestoreapi.com/products")
+            + ",https://dummyjson.com/products?limit=20",
+        ).split(",")
+        if url.strip()
+    ]
     try:
         timeout = max(5, int(os.getenv("PARTNER_API_TIMEOUT", "15")))
     except ValueError:
         timeout = 15
 
-    try:
-        resposta = requests.get(url, timeout=timeout)
-        resposta.raise_for_status()
-        produtos = resposta.json()
-        if not isinstance(produtos, list):
-            raise ValueError("A API parceira não retornou uma lista de produtos.")
-        if busca:
-            termo = busca.lower()
-            produtos = [p for p in produtos if termo in p.get("title", "").lower()]
-        return produtos, False
-    except (requests.RequestException, ValueError, TypeError) as exc:
-        logger.warning("Falha ao consumir API parceira %s: %s", url, exc)
-        return [], True
+    for url in urls:
+        try:
+            resposta = requests.get(
+                url,
+                timeout=timeout,
+                headers={"Accept": "application/json", "User-Agent": "CompraAi/1.0"},
+            )
+            resposta.raise_for_status()
+            dados = resposta.json()
+            produtos = dados.get("products", []) if isinstance(dados, dict) else dados
+            if not isinstance(produtos, list):
+                raise ValueError("A API parceira não retornou uma lista de produtos.")
+
+            normalizados = []
+            for produto in produtos:
+                if "image" not in produto and produto.get("thumbnail"):
+                    produto["image"] = produto["thumbnail"]
+                normalizados.append(produto)
+
+            if busca:
+                termo = busca.lower()
+                normalizados = [
+                    p for p in normalizados if termo in p.get("title", "").lower()
+                ]
+            logger.info("API parceira carregada com sucesso: %s (%s produtos)", url, len(normalizados))
+            return normalizados, False
+        except (requests.RequestException, ValueError, TypeError) as exc:
+            logger.warning("Falha ao consumir API parceira %s: %s", url, exc)
+
+    return [], True
 
 
 # ---------- páginas públicas ----------
