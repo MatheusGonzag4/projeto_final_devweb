@@ -1,6 +1,0 @@
-Django>=6.1
-djangorestframework
-supabase
-python-dotenv
-requests
-Pillow
