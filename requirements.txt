@@ -1,7 +1,0 @@
-Django>=6.1
-djangorestframework
-supabase
-python-dotenv
-requests
-Pillow
-gunicorn==20.1.0
